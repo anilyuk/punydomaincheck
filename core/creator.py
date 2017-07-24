@@ -99,10 +99,11 @@ def create_alternatives(args, charset_json, logger, output_dir):
             temp_str = "".join(item)
 
             temp_str_unicode = (unicode(temp_str).decode('unicode_escape'))
-
             try:
 
                 with_idna = temp_str_unicode.encode('idna')
+                #if "xn" not in with_idna:
+                #print "{} - {}".format(temp_str, with_idna)
 
             except:
 

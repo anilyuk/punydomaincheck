@@ -6,6 +6,7 @@ class PhishingDomain:
         self.ipaddress = ipaddress
         self.whois_result = whois_result
         self.similarity = ""
+        self.geolocation = None
 
     def get_domain_name(self):
 
@@ -30,3 +31,11 @@ class PhishingDomain:
     def get_similarity(self):
 
         return self.similarity
+
+    def set_geolocation(self, geolocation):
+
+        self.geolocation = geolocation
+
+    def get_geolocation(self):
+
+        return self.geolocation

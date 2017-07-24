@@ -1,9 +1,10 @@
-from core.common import alternative_filename, print_percentage
+from core.common import alternative_filename, GEOLOCATION_WEBSITE
 from threading import Thread
 import dns.resolver
 from phishingdomain import PhishingDomain
 from pythonwhois import get_whois
 from phishingtest import CheckPhishing
+import requests
 
 
 class dns_client(Thread):
@@ -41,11 +42,16 @@ class dns_client(Thread):
                 # else:
 
                 if dns_result:
+
                     whois_result = self.query_whois(query)
 
                     for answer in dns_result:
                         result = PhishingDomain(domain_name=domain, ipaddress=str(answer),
                                                 whois_result=whois_result)
+
+                        geolocation_result = self.query_geolocation(ip_address=answer)
+                        result.set_geolocation(geolocation=geolocation_result)
+
                         original_domain = "{}.{}".format(self.args.domain, self.args.original_suffix)
                         similarity = CheckPhishing(or_domain=original_domain, or_site_port=self.args.original_port,
                                                    test_domain=str(query), logger=self.logger)
@@ -124,6 +130,12 @@ class dns_client(Thread):
 
             self.logger.debug(e)
             return None
+
+    def query_geolocation(self, ip_address):
+
+        response = requests.get("{}/{}".format(GEOLOCATION_WEBSITE, ip_address))
+        json_response = response.json()
+        return json_response
 
 
 def load_domainnames(args, output_dir):

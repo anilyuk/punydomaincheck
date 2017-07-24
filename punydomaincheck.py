@@ -179,20 +179,22 @@ def punyDomainCheck(args):
 
                     if print_header:
 
-                        header_string = "Domain Name - IP Address - Whois Name - Whois Organization - Whois Email - HTTP Similarity - HTTPS Similarity"
+                        header_string = "Domain Name - IP Address - Whois Name - Whois Organization - Whois Email - HTTP Similarity - HTTPS Similarity - Country - City"
                         logger.info("[+] {}".format(header_string))
                         if dns_file_new_created:
                             dns_file.write("{}\n".format(header_string))
                         print_header = False
 
-                    string_to_write = "{} - {} - {} - {} - {} - {} - {}".format(result.get_domain_name(),
+                    string_to_write = "{} - {} - {} - {} - {} - {} - {} - {} - {}".format(result.get_domain_name(),
                                                                                 result.get_ipaddress(),
                                                                                 whois_name, whois_organization,
                                                                                 whois_email,
                                                                                 result.get_similarity()[
                                                                                     "http_similarity"],
                                                                                 result.get_similarity()[
-                                                                                    "https_similarity"])
+                                                                                    "https_similarity"],
+                                                                                result.get_geolocation()["country_name"],
+                                                                                result.get_geolocation()["city"])
 
                     logger.info(
                         "[+] {}".format(string_to_write))

@@ -9,7 +9,7 @@ CHARSET_FILE = "./misc/charset.json"
 LETTERS_FILE = "./misc/letters.json"
 MAX_THREAD_COUNT = 7
 OUTPUT_DIR = "./output"
-
+GEOLOCATION_WEBSITE = "http://freegeoip.net/json"
 
 def alternative_filename(args, output_dir):
     return "{}/{}_{}char_alternatives".format(output_dir, args.domain, args.count)
