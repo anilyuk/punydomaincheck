@@ -139,12 +139,18 @@ class dns_client(Thread):
 
 
 def load_domainnames(args, output_dir):
-    alternatives_file = open(alternative_filename(args, output_dir))
-    alternatives = alternatives_file.read().split("\n")
-    thread_count = int(args.thread)
-    if len(alternatives) < thread_count: thread_count = len(alternatives)
 
-    alternatives_list = create_chunks(alternatives, int(thread_count))
+    all_alternatives = ""
+    for i in range(1, int(args.count) + 1):
+        alternatives_file = open(alternative_filename(args, output_dir, i))
+        alternatives = alternatives_file.read()
+        all_alternatives = all_alternatives + "\n" + alternatives
+
+    all_alternatives = all_alternatives.split("\n")
+    thread_count = int(args.thread)
+    if len(all_alternatives) < thread_count: thread_count = len(all_alternatives)
+
+    alternatives_list = create_chunks(all_alternatives, int(thread_count))
 
     return alternatives_list
 

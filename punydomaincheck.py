@@ -6,7 +6,7 @@ from core.exceptions import CharSetException, AlternativesExists
 from core.logger import start_logger
 from core.confusable import update_charset
 from core.domain import load_domainnames, dns_client
-from core.common import print_percentage, OUTPUT_DIR
+from core.common import print_percentage, OUTPUT_DIR, BANNER
 from time import sleep
 from Queue import Queue
 from os.path import getsize
@@ -70,7 +70,9 @@ def punyDomainCheck(args):
             mkdir(output_dir)
 
         try:
-            create_alternatives(args=args, charset_json=charset_json, logger=logger, output_dir=output_dir)
+
+            for i in range(1, int(args.count) + 1):
+                create_alternatives(args=args, charset_json=charset_json, logger=logger, output_dir=output_dir, count=i)
 
         except AlternativesExists:
 
@@ -186,15 +188,18 @@ def punyDomainCheck(args):
                         print_header = False
 
                     string_to_write = "{} - {} - {} - {} - {} - {} - {} - {} - {}".format(result.get_domain_name(),
-                                                                                result.get_ipaddress(),
-                                                                                whois_name, whois_organization,
-                                                                                whois_email,
-                                                                                result.get_similarity()[
-                                                                                    "http_similarity"],
-                                                                                result.get_similarity()[
-                                                                                    "https_similarity"],
-                                                                                result.get_geolocation()["country_name"],
-                                                                                result.get_geolocation()["city"])
+                                                                                          result.get_ipaddress(),
+                                                                                          whois_name,
+                                                                                          whois_organization,
+                                                                                          whois_email,
+                                                                                          result.get_similarity()[
+                                                                                              "http_similarity"],
+                                                                                          result.get_similarity()[
+                                                                                              "https_similarity"],
+                                                                                          result.get_geolocation()[
+                                                                                              "country_name"],
+                                                                                          result.get_geolocation()[
+                                                                                              "city"])
 
                     logger.info(
                         "[+] {}".format(string_to_write))
@@ -213,5 +218,6 @@ def punyDomainCheck(args):
 charset_json = None
 
 if __name__ == '__main__':
+    print BANNER
     args = arg_parser()
     punyDomainCheck(args)

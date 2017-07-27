@@ -48,12 +48,12 @@ def calculate_alternative_count(domain_name, charset_json, combination):
     return total_count
 
 
-def create_alternatives(args, charset_json, logger, output_dir):
-    alternatives_filename = alternative_filename(args=args, output_dir=output_dir)
+def create_alternatives(args, charset_json, logger, output_dir, count):
+    alternatives_filename = alternative_filename(args=args, output_dir=output_dir, count=count)
 
     domain_name = str(args.domain).split(".")[0]
 
-    combination = list(combinations(range(0, len(domain_name)), int(args.count)))
+    combination = list(combinations(range(0, len(domain_name)), int(count)))
 
     total_alternative_count = calculate_alternative_count(domain_name, charset_json, combination)
 
@@ -68,7 +68,7 @@ def create_alternatives(args, charset_json, logger, output_dir):
 
     alternatives_file = open(alternatives_filename, 'w')
 
-    logger.info("[*] Creating idna domain names for {}".format(domain_name))
+    logger.info("[*] Creating idna domain names for {} and {} character will be changed".format(domain_name, count))
 
     logger.info("[*] {}".format(datetime.now()))
 
