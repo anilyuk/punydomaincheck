@@ -1,7 +1,12 @@
-from sys import stdout
+# Puny Domain Check v1.0
+# Author: Anil YUKSEL, Mustafa Mert KARATAS
+# E-mail: anil [ . ] yksel [ @ ] gmail [ . ] com, mmkaratas92 [ @ ] gmail [ . ] com
+# URL: https://github.com/anilyuk/punydomaincheck
+
+from sys import stdout, platform
 from core.logger import LOG_HEADER
 
-VERSION="1.0"
+VERSION = "1.0.1"
 CONFUSABLE_URL = "http://www.unicode.org/Public/security/latest/confusables.txt"
 CONFUSABLE_FILE = "./misc/confusables.txt"
 BLACKLIST_LETTERS = "./misc/blacklist_letters.json"
@@ -18,38 +23,54 @@ BANNER = ''' _ __  _   _ _ __  _   _  ___| |__   ___  ___| | __
 |_|                |___/                                {}    
 '''.format(VERSION)
 
-def alternative_filename(args, output_dir, count):
-    return "{}/{}_{}char_alternatives".format(output_dir, args.domain, count)
+# Set console colors
+if platform != 'win32' and stdout.isatty():
+    YEL = '\x1b[33m'
+    MAG = '\x1b[35m'
+    BLU = '\x1b[34m'
+    GRE = '\x1b[32m'
+    RED = '\x1b[31m'
+    RST = '\x1b[39m'
+    CYA = '\x1b[36m'
 
 
-def print_percentage(args, logger, current, total=0, last_percentage=0, header_print=0):
+else:
+    YEL = ''
+    MAG = ''
+    GRE = ''
+    RED = ''
+    BLU = ''
+    CYA = ''
+    RST = ''
 
+
+def alternative_filename(args, output_dir):
+    return "{}/{}_{}char_alternatives".format(output_dir, args.domain, args.count)
+
+
+def print_percentage(args, logger, current, total=0, last_percentage=0, header_print=False):
     if total != 0:
         percentage = int((100 * current) / total)
     else:
         percentage = current
 
-    if percentage % 10 == 0 and last_percentage != percentage:
+    if not header_print and not args.debug:
+        stdout.write("{}Processing: {}0%".format(LOG_HEADER, BLU))
+        header_print = True
+        stdout.flush()
+
+    if percentage % 10 == 0 and last_percentage != percentage and percentage != 0:
 
         last_percentage = percentage
         if args.debug:
 
-            logger.info("[*] Processing... {}".format(percentage))
+            logger.info("[*] Processing... {}{}{}".format(BLU, percentage, RST))
 
         else:
 
-            if not header_print:
-                stdout.write("{}Processing: ".format(LOG_HEADER))
-                header_print = True
+            if percentage == 100:
 
-            string_stdout = ""
-            if percentage == 0:
-
-                string_stdout = "{}%".format(percentage)
-
-            elif percentage == 100:
-
-                string_stdout = "...{}%\n".format(percentage)
+                string_stdout = "...{}%{}\n".format(percentage, RST)
 
             else:
 

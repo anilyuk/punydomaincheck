@@ -1,3 +1,8 @@
+# Puny Domain Check v1.0
+# Author: Anil YUKSEL, Mustafa Mert KARATAS
+# E-mail: anil [ . ] yksel [ @ ] gmail [ . ] com, mmkaratas92 [ @ ] gmail [ . ] com
+# URL: https://github.com/anilyuk/punydomaincheck
+
 from core.common import alternative_filename, GEOLOCATION_WEBSITE
 from threading import Thread
 import dns.resolver
@@ -52,10 +57,13 @@ class dns_client(Thread):
                         geolocation_result = self.query_geolocation(ip_address=answer)
                         result.set_geolocation(geolocation=geolocation_result)
 
-                        original_domain = "{}.{}".format(self.args.domain, self.args.original_suffix)
-                        similarity = CheckPhishing(or_domain=original_domain, or_site_port=self.args.original_port,
-                                                   test_domain=str(query), logger=self.logger)
-                        result.set_similarity(similarity=similarity)
+                        if self.args.domain and self.args.original_suffix:
+
+                            original_domain = "{}.{}".format(self.args.domain, self.args.original_suffix)
+                            similarity = CheckPhishing(or_domain=original_domain, or_site_port=self.args.original_port,
+                                                       test_domain=str(query), logger=self.logger)
+                            result.set_similarity(similarity=similarity)
+
                         self.output_list.append(result)
 
             count += 1
@@ -93,7 +101,7 @@ class dns_client(Thread):
             return None
 
         except Exception, e:
-            self.logger.error("[-] {}".format(e))
+            self.logger.debug("[-] {}".format(e))
             return None
 
         else:
@@ -140,17 +148,12 @@ class dns_client(Thread):
 
 def load_domainnames(args, output_dir):
 
-    all_alternatives = ""
-    for i in range(1, int(args.count) + 1):
-        alternatives_file = open(alternative_filename(args, output_dir, i))
-        alternatives = alternatives_file.read()
-        all_alternatives = all_alternatives + "\n" + alternatives
+    alternatives_file = open(alternative_filename(args, output_dir))
+    alternatives = alternatives_file.read().split("\n")
 
-    all_alternatives = all_alternatives.split("\n")
     thread_count = int(args.thread)
-    if len(all_alternatives) < thread_count: thread_count = len(all_alternatives)
-
-    alternatives_list = create_chunks(all_alternatives, int(thread_count))
+    if len(alternatives) < thread_count: thread_count = len(alternatives)
+    alternatives_list = create_chunks(alternatives, int(thread_count))
 
     return alternatives_list
 

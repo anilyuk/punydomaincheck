@@ -1,11 +1,19 @@
+# Puny Domain Check v1.0
+# Author: Anil YUKSEL, Mustafa Mert KARATAS
+# E-mail: anil [ . ] yksel [ @ ] gmail [ . ] com, mmkaratas92 [ @ ] gmail [ . ] com
+# URL: https://github.com/anilyuk/punydomaincheck
+
+
 from urllib import urlretrieve, urlopen
 from copy import deepcopy
 import json
 from core.common import CONFUSABLE_URL, CONFUSABLE_FILE, BLACKLIST_LETTERS, CHARSET_FILE, WHITELIST_LETTERS
 from os import remove
 
+
 def update_charset(logger, letters_json):
     logger.info("[*] Updating character list")
+
     # Download confusables.txt
     u = urlopen(CONFUSABLE_URL)
     filesize = int(u.info().getheaders("Content-Length")[0]) / 1000
@@ -25,7 +33,6 @@ def update_charset(logger, letters_json):
     new_letters_json = deepcopy(letters_json)
 
     for char_num in range(97, 123):
-
         new_letters_json[str(chr(char_num))] = []
 
     # First, get characters from whitelist_letters.json file
@@ -45,7 +52,7 @@ def update_charset(logger, letters_json):
 
             else:
 
-                #if "xn" in with_idna:
+                # if "xn" in with_idna:
                 character_array = list(new_letters_json[str(chr(char_num))])
                 character_array.append(char)
                 new_letters_json[str(chr(char_num))] = character_array
@@ -83,8 +90,6 @@ def update_charset(logger, letters_json):
 
                                 character = '\u' + "0" * (8 - len(character)) + character
 
-                            with_idna = ""
-
                             try:
 
                                 with_idna = (unicode(character).decode('unicode_escape')).encode("idna")
@@ -96,14 +101,9 @@ def update_charset(logger, letters_json):
                             else:
 
                                 if "xn" in with_idna:
-
                                     character_array = list(new_letters_json[letter_normal])
                                     character_array.append(character)
                                     new_letters_json[letter_normal] = character_array
-
-    # for char_num in range(97,123):
-    #
-    #     print "{} - {}".format(chr(char_num), len(new_letters_json[chr(char_num)]))
 
     logger.info("[*] Charset successfully created")
 

@@ -1,12 +1,17 @@
+# Puny Domain Check v1.0
+# Author: Anil YUKSEL, Mustafa Mert KARATAS
+# E-mail: anil [ . ] yksel [ @ ] gmail [ . ] com, mmkaratas92 [ @ ] gmail [ . ] com
+# URL: https://github.com/anilyuk/punydomaincheck
+
 from argparse import ArgumentParser, RawTextHelpFormatter
-from sys import exit, stdout
+from sys import exit
 
 from core.creator import *
 from core.exceptions import CharSetException, AlternativesExists
 from core.logger import start_logger
 from core.confusable import update_charset
 from core.domain import load_domainnames, dns_client
-from core.common import print_percentage, OUTPUT_DIR, BANNER
+from core.common import print_percentage, OUTPUT_DIR, BANNER, BLU, RST, RED, GRE
 from time import sleep
 from Queue import Queue
 from os.path import getsize
@@ -15,26 +20,22 @@ from os import remove, mkdir, stat
 
 def arg_parser():
     parser = ArgumentParser(formatter_class=RawTextHelpFormatter)
-    parser.add_argument("-d", "--domain", default="havelsan", help="Domain without prefix and suffix. (google)")
-    parser.add_argument("-s", "--suffix", default="com", help="Suffix to check alternative domain names. (.com, .net)")
     parser.add_argument("-u", "--update", action="store_true", default=False, help="Update character set")
     parser.add_argument("--debug", action="store_true", default=False, help="Enable debug logging")
+    parser.add_argument("-d", "--domain", default="havelsan", help="Domain without prefix and suffix. (google)")
+    parser.add_argument("-s", "--suffix", default="com", help="Suffix to check alternative domain names. (.com, .net)")
     parser.add_argument("-c", "--count", default="all", help="Character count to change with punycode alternative")
+    parser.add_argument("-os", "--original_suffix", default="",
+                        help="Original domain to check for phisihing")
+    parser.add_argument("-op", "--original_port", default="", help="Original port to check for phisihing")
     parser.add_argument("-f", "--force", action="store_true", default=False,
                         help="Force to calculate alternative domain names")
-    parser.add_argument("-t", "--thread", default=10, help="Thread count")
-    parser.add_argument("-os", "--original_suffix", default="com.tr",
-                        help="Original domain to check for phisihing")
-    parser.add_argument("-op", "--original_port", default=80, help="Original port to check for phisihing")
+    parser.add_argument("-t", "--thread", default=15, help="Thread count")
 
     return parser.parse_args()
 
 
-# letters_json = load_letters()
-
-def punyDomainCheck(args):
-    logger = start_logger(args)
-
+def punyDomainCheck(args, logger):
     letters_json = load_letters()
 
     try:
@@ -45,11 +46,12 @@ def punyDomainCheck(args):
 
         if (not args.update):
             update_charset(logger, letters_json)
+            charset_json = load_charset()
 
     if args.update:
         update_charset(logger, letters_json)
 
-    elif int(args.count) < len(args.domain):
+    elif int(args.count) <= len(args.domain):
 
         try:
 
@@ -71,8 +73,7 @@ def punyDomainCheck(args):
 
         try:
 
-            for i in range(1, int(args.count) + 1):
-                create_alternatives(args=args, charset_json=charset_json, logger=logger, output_dir=output_dir, count=i)
+            create_alternatives(args=args, charset_json=charset_json, logger=logger, output_dir=output_dir)
 
         except AlternativesExists:
 
@@ -80,13 +81,15 @@ def punyDomainCheck(args):
         except NoAlternativesFound:
             logger.info("[*] No alternatives found for domain \"{}\".".format(args.domain))
             exit()
+        except KeyboardInterrupt:
+            exit()
 
         domain_name_list = load_domainnames(args=args, output_dir=output_dir)
         dns_thread_list = []
         threads_queue = []
         thread_count = 0
-        logger.info("[*] Every thread will resolve {} names".format(str(len(domain_name_list[0]))))
-        logger.info("[*] {}".format(datetime.now()))
+        logger.info("[*] Every thread will resolve {}{}{} names".format(BLU, str(len(domain_name_list[0])), RST))
+        # logger.info("[*] {}".format(datetime.now()))
 
         for list in domain_name_list:
 
@@ -102,7 +105,7 @@ def punyDomainCheck(args):
 
                 thread_count += 1
 
-        logger.info("[*] DNS Client thread started. Thread count: {}".format(len(dns_thread_list)))
+        logger.info("[*] DNS Client thread started. Thread count: {}{}{}".format(BLU, len(dns_thread_list), RST))
 
         dns_client_completed = False
         query_result = []
@@ -112,15 +115,11 @@ def punyDomainCheck(args):
 
         while not dns_client_completed:
 
-            sleep(0.001)
-
-            for queue in threads_queue:
-
-                if not queue.empty():
-                    query_result.append(queue.get())
-
-            if len(query_result) == int(thread_count):
-                dns_client_completed = True
+            try:
+                sleep(0.001)
+            except KeyboardInterrupt:
+                print RST
+                exit()
 
             total_percentage = 0
 
@@ -132,6 +131,18 @@ def punyDomainCheck(args):
             last_percentage, header_print = print_percentage(args, logger, total_percentage,
                                                              last_percentage=last_percentage,
                                                              header_print=header_print)
+
+            for queue in threads_queue:
+                try:
+
+                    if not queue.empty():
+                        query_result.append(queue.get())
+                except KeyboardInterrupt:
+                    print RST
+                    exit()
+
+            if len(query_result) == int(thread_count):
+                dns_client_completed = True
 
         dns_file_name = "{}/{}_dns".format(output_dir, args.domain)
         dns_file_content = []
@@ -159,6 +170,8 @@ def punyDomainCheck(args):
                     whois_email = ""
                     whois_name = ""
                     whois_organization = ""
+                    whois_creation_date = ""
+                    whois_updated_date = ""
                     whois_result = result.get_whois_result()
 
                     if whois_result:
@@ -179,45 +192,62 @@ def punyDomainCheck(args):
 
                                     if "organization" in whois_admin: whois_organization = whois_admin["organization"]
 
+                        if "creation_date" in whois_result: whois_creation_date = whois_result["creation_date"][0]
+                        if "updated_date" in whois_result: whois_updated_date = whois_result["updated_date"][0]
+
                     if print_header:
 
-                        header_string = "Domain Name - IP Address - Whois Name - Whois Organization - Whois Email - HTTP Similarity - HTTPS Similarity - Country - City"
-                        logger.info("[+] {}".format(header_string))
+                        header_string = "Domain Name - IP Address - Whois Name - Whois Organization - Whois Email - Whois Creation Date - Whois Updated Date - HTTP Similarity - HTTPS Similarity - Country - City"
+                        logger.info("[+] {}{}{}".format(GRE, header_string, RST))
                         if dns_file_new_created:
                             dns_file.write("{}\n".format(header_string))
                         print_header = False
 
-                    string_to_write = "{} - {} - {} - {} - {} - {} - {} - {} - {}".format(result.get_domain_name(),
-                                                                                          result.get_ipaddress(),
-                                                                                          whois_name,
-                                                                                          whois_organization,
-                                                                                          whois_email,
-                                                                                          result.get_similarity()[
-                                                                                              "http_similarity"],
-                                                                                          result.get_similarity()[
-                                                                                              "https_similarity"],
-                                                                                          result.get_geolocation()[
-                                                                                              "country_name"],
-                                                                                          result.get_geolocation()[
-                                                                                              "city"])
+                    http_similarity = ""
+                    https_similarity = ""
+                    if "http_similarity" in result.get_similarity():
+                        http_similarity = result.get_similarity()["http_similarity"]
+                    if "https_similarity" in result.get_similarity():
+                        https_similarity = result.get_similarity()["https_similarity"]
 
-                    logger.info(
-                        "[+] {}".format(string_to_write))
+                    string_to_write = "{} - {} - {} - {} - {} - {} - {} - {} - {} - {} - {}".format(
+                        result.get_domain_name(),
+                        result.get_ipaddress(),
+                        whois_name,
+                        whois_organization,
+                        whois_email,
+                        whois_creation_date,
+                        whois_updated_date,
+                        http_similarity,
+                        https_similarity,
+                        result.get_geolocation()[
+                            "country_name"],
+                        result.get_geolocation()[
+                            "city"])
+
+
+                    color = BLU
 
                     if "{}\n".format(string_to_write) not in dns_file_content:
                         dns_file.write("{}\n".format(string_to_write))
+                        color = RED
+
+                    logger.info(
+                        "[+] {}{}{}".format(color, string_to_write, RST))
 
         dns_file.close()
 
         if getsize(dns_file_name) == 0:
             remove(dns_file_name)
 
-        logger.info("[*] {}".format(datetime.now()))
+            # logger.info("[*] {}".format(datetime.now()))
 
 
 charset_json = None
 
 if __name__ == '__main__':
-    print BANNER
+    print '%s%s%s' % (BLU, BANNER, RST)
+
     args = arg_parser()
-    punyDomainCheck(args)
+    logger = start_logger(args)
+    punyDomainCheck(args, logger)

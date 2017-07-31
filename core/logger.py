@@ -1,11 +1,16 @@
-#from logging import getLogger, Formatter, StreamHandler, DEBUG, INFO
-from logging import Formatter, DEBUG, INFO, StreamHandler, getLogger
+# Puny Domain Check v1.0
+# Author: Anil YUKSEL, Mustafa Mert KARATAS
+# E-mail: anil [ . ] yksel [ @ ] gmail [ . ] com, mmkaratas92 [ @ ] gmail [ . ] com
+# URL: https://github.com/anilyuk/punydomaincheck
+
+from logging import DEBUG, INFO, getLogger
 from coloredlogs import install
 from os import environ
 
 LOG_HEADER = "[*] "
-def start_logger(args):
 
+
+def start_logger(args):
     logger = getLogger("PunyCodeCheck")
     environ["COLOREDLOGS_LOG_FORMAT"] = '%(message)s'
 
@@ -19,8 +24,4 @@ def start_logger(args):
         logger.setLevel(INFO)
         install(INFO, logger=logger)
 
-    #formatter = ColoredFormatter('%(log_color)s%(message)s')
-    #ch = StreamHandler()
-    #ch.setFormatter(formatter)
-    #logger.addHandler(ch)
     return logger

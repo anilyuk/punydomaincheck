@@ -1,11 +1,14 @@
+# Puny Domain Check v1.0
+# Author: Anil YUKSEL, Mustafa Mert KARATAS
+# E-mail: anil [ . ] yksel [ @ ] gmail [ . ] com, mmkaratas92 [ @ ] gmail [ . ] com
+# URL: https://github.com/anilyuk/punydomaincheck
+
 import json
 from core.exceptions import CharSetException, AlternativesExists, NoAlternativesFound
 from itertools import product, combinations
 from datetime import datetime
-from core.common import LETTERS_FILE, CHARSET_FILE, alternative_filename, print_percentage
+from core.common import LETTERS_FILE, CHARSET_FILE, alternative_filename, print_percentage, BLU, RST
 from os.path import isfile
-
-import sys
 
 
 def load_letters():
@@ -48,12 +51,12 @@ def calculate_alternative_count(domain_name, charset_json, combination):
     return total_count
 
 
-def create_alternatives(args, charset_json, logger, output_dir, count):
-    alternatives_filename = alternative_filename(args=args, output_dir=output_dir, count=count)
+def create_alternatives(args, charset_json, logger, output_dir):
+    alternatives_filename = alternative_filename(args=args, output_dir=output_dir)
 
     domain_name = str(args.domain).split(".")[0]
 
-    combination = list(combinations(range(0, len(domain_name)), int(count)))
+    combination = list(combinations(range(0, len(domain_name)), int(args.count)))
 
     total_alternative_count = calculate_alternative_count(domain_name, charset_json, combination)
 
@@ -61,14 +64,17 @@ def create_alternatives(args, charset_json, logger, output_dir, count):
     last_percentage = 1
     header_print = False
 
-    logger.info("[*] {} alternatives found for {}".format(total_alternative_count, domain_name))
+    logger.info(
+        "[*] {}{}{} alternatives found for {}{}.{}{}".format(BLU, total_alternative_count, RST, BLU, domain_name,
+                                                             args.suffix, RST))
 
     if isfile(alternatives_filename) and not args.force:
         raise AlternativesExists
 
     alternatives_file = open(alternatives_filename, 'w')
 
-    logger.info("[*] Creating idna domain names for {} and {} character will be changed".format(domain_name, count))
+    logger.info(
+        "[*] Creating idna domain names for {} and {} character will be changed".format(domain_name, args.count))
 
     logger.info("[*] {}".format(datetime.now()))
 
@@ -102,8 +108,8 @@ def create_alternatives(args, charset_json, logger, output_dir, count):
             try:
 
                 with_idna = temp_str_unicode.encode('idna')
-                #if "xn" not in with_idna:
-                #print "{} - {}".format(temp_str, with_idna)
+                # if "xn" not in with_idna:
+                # print "{} - {}".format(temp_str, with_idna)
 
             except:
 
