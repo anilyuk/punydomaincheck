@@ -3,14 +3,15 @@
 # E-mail: anil [ . ] yksel [ @ ] gmail [ . ] com, mmkaratas92 [ @ ] gmail [ . ] com
 # URL: https://github.com/anilyuk/punydomaincheck
 
-from core.common import alternative_filename, GEOLOCATION_WEBSITE
+from core.common import alternative_filename, GEOLOCATION_WEBSITE, VT_APIKEY_LIST
 from threading import Thread
 import dns.resolver
 from phishingdomain import PhishingDomain
 from pythonwhois import get_whois
 from phishingtest import CheckPhishing
 import requests
-
+if VT_APIKEY_LIST:
+    from core.vt_scan import scanURL
 
 class dns_client(Thread):
     def __init__(self, args, logger, domain_list, output_queue, thread_name):
@@ -56,6 +57,9 @@ class dns_client(Thread):
 
                         geolocation_result = self.query_geolocation(ip_address=answer)
                         result.set_geolocation(geolocation=geolocation_result)
+
+                        if VT_APIKEY_LIST:
+                            result.set_vt_result(scanURL(url=query))
 
                         if self.args.domain and self.args.original_suffix:
 

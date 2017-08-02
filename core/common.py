@@ -16,12 +16,16 @@ LETTERS_FILE = "./misc/letters.json"
 MAX_THREAD_COUNT = 7
 OUTPUT_DIR = "./output"
 GEOLOCATION_WEBSITE = "http://freegeoip.net/json"
+### YOUR VIRUSTOTAL API KEYs
+VT_APIKEY_LIST = []
+
 BANNER = ''' _ __  _   _ _ __  _   _  ___| |__   ___  ___| | __
 | '_ \| | | | '_ \| | | |/ __| '_ \ / _ \/ __| |/ /
 | |_) | |_| | | | | |_| | (__| | | |  __/ (__|   < 
 | .__/ \__,_|_| |_|\__, |\___|_| |_|\___|\___|_|\_\\
 |_|                |___/                                {}    
 '''.format(VERSION)
+
 
 # Set console colors
 if platform != 'win32' and stdout.isatty():

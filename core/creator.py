@@ -7,7 +7,7 @@ import json
 from core.exceptions import CharSetException, AlternativesExists, NoAlternativesFound
 from itertools import product, combinations
 from datetime import datetime
-from core.common import LETTERS_FILE, CHARSET_FILE, alternative_filename, print_percentage, BLU, RST
+from core.common import LETTERS_FILE, CHARSET_FILE, alternative_filename, print_percentage, BLU, RST, GRE
 from os.path import isfile
 
 
@@ -65,7 +65,7 @@ def create_alternatives(args, charset_json, logger, output_dir):
     header_print = False
 
     logger.info(
-        "[*] {}{}{} alternatives found for {}{}.{}{}".format(BLU, total_alternative_count, RST, BLU, domain_name,
+        "[*] {}{}{} alternatives found for {}{}.{}{}".format(BLU, total_alternative_count, RST, GRE, domain_name,
                                                              args.suffix, RST))
 
     if isfile(alternatives_filename) and not args.force:

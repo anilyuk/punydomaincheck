@@ -3,3 +3,5 @@ pythonwhois
 bs4
 dnspython
 requests
+ratelimit
+tabulate
