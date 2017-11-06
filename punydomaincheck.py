@@ -183,9 +183,9 @@ def punyDomainCheck(args, logger):
 
         print_header = True
 
-        headers_list = ["Domain Name", "IP Address", "Whois Name", "Whois Organization", "Whois Email",
+        headers_list = ["","Domain Name", "IP Address", "Whois Name", "Whois Organization", "Whois Email",
                         "Whois Updated Date", "HTTP Similarity", "HTTPS Similarity",
-                        "Country", "City", "Virustotal Result", "Subdomains"]
+                        "Country", "City", "Virustotal Result", "Subdomains",""]
 
         dns_file = open(dns_file_name, 'a')
         string_array = []
@@ -225,7 +225,7 @@ def punyDomainCheck(args, logger):
 
                     if print_header:
 
-                        header_string = ";".join(headers_list)
+                        header_string = ";".join(headers_list[1:-1])
 
                         if dns_file_new_created:
                             dns_file.write("{}\n".format(header_string))
@@ -283,6 +283,7 @@ def punyDomainCheck(args, logger):
                              "city"],
                          virustotal_result,
                          subdomains, RST])
+
 
         logger.info(
             "[+] Punycheck result for {}{}.{}{}:\n {}".format(GRE, args.domain, args.suffix, RST,
