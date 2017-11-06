@@ -4,7 +4,7 @@
 # URL: https://github.com/anilyuk/punydomaincheck
 
 import socket
-import requests
+from requests import get, packages, exceptions
 from bs4 import BeautifulSoup
 from difflib import SequenceMatcher
 import re
@@ -94,22 +94,22 @@ def addProtocol(domain_name, http_port=80):
 
 
 def makeRequest(url, logger, redirect=True, proxies={}):
-    requests.packages.urllib3.disable_warnings()
+    packages.urllib3.disable_warnings()
     try:
 
-        response = requests.get(url, allow_redirects=redirect, verify=False, proxies=proxies, timeout=25)
+        response = get(url, allow_redirects=redirect, verify=False, proxies=proxies, timeout=25)
         newurl = "{}/{}".format(url, meta_redirect(response.text))
 
         while newurl:
-            response = requests.get(newurl, allow_redirects=redirect, verify=False, proxies=proxies, timeout=25)
+            response = get(newurl, allow_redirects=redirect, verify=False, proxies=proxies, timeout=25)
             newurl = meta_redirect(response.text)
 
-    except requests.exceptions.ConnectionError, e:
+    except exceptions.ConnectionError, e:
 
         logger.debug("[-] {} - {}".format(url, str(e)))
         return
 
-    except requests.exceptions.ReadTimeout, e:
+    except exceptions.ReadTimeout, e:
 
         logger.debug("[-] {} - {}".format(url, str(e)))
         return

@@ -6,7 +6,7 @@
 from sys import stdout, platform
 from core.logger import LOG_HEADER
 
-VERSION = "1.0.1"
+VERSION = "1.0.2"
 CONFUSABLE_URL = "http://www.unicode.org/Public/security/latest/confusables.txt"
 CONFUSABLE_FILE = "./misc/confusables.txt"
 BLACKLIST_LETTERS = "./misc/blacklist_letters.json"

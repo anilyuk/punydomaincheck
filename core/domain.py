@@ -143,6 +143,11 @@ class dns_client(Thread):
             self.logger.debug(e)
             return None
 
+        except:
+
+            self.logger.debug(e)
+            return None
+
     def query_geolocation(self, ip_address):
 
         response = requests.get("{}/{}".format(GEOLOCATION_WEBSITE, ip_address))

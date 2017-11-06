@@ -26,12 +26,14 @@ def arg_parser():
     parser = ArgumentParser(formatter_class=RawTextHelpFormatter)
     parser.add_argument("-u", "--update", action="store_true", default=False, help="Update character set")
     parser.add_argument("--debug", action="store_true", default=False, help="Enable debug logging")
-    parser.add_argument("-d", "--domain", default="havelsan", help="Domain without prefix and suffix. (google)")
-    parser.add_argument("-s", "--suffix", default="com", help="Suffix to check alternative domain names. (.com, .net)")
-    parser.add_argument("-c", "--count", default="all", help="Character count to change with punycode alternative")
-    parser.add_argument("-os", "--original_suffix", default="",
-                        help="Original domain to check for phisihing")
-    parser.add_argument("-op", "--original_port", default="", help="Original port to check for phisihing")
+    parser.add_argument("-d", "--domain", required=True, help="Domain without prefix and suffix. (google)")
+    parser.add_argument("-s", "--suffix", required=True, help="Suffix to check alternative domain names. (.com, .net)")
+    parser.add_argument("-c", "--count", required=True, help="Character count to change with punycode alternative")
+    parser.add_argument("-os", "--original_suffix", default=None,
+                        help="Original domain to check for phisihing\n"
+                        "Optional, use it with original port to run phishing test")
+    parser.add_argument("-op", "--original_port", default=None, help="Original port to check for phisihing\n"
+                                                                   "Optional, use it with original suffix to run phishing test")
     parser.add_argument("-f", "--force", action="store_true", default=False,
                         help="Force to calculate alternative domain names")
     parser.add_argument("-t", "--thread", default=15, help="Thread count")
@@ -41,6 +43,17 @@ def arg_parser():
 
 def punyDomainCheck(args, logger):
     letters_json = load_letters()
+
+    if args.original_port and not args.original_suffix:
+
+        logger.info("[-] Original suffix required!")
+        exit()
+
+    elif not args.original_port and args.original_suffix:
+
+        logger.info("[-] Original port required!")
+        exit()
+
 
     try:
 
@@ -163,6 +176,10 @@ def punyDomainCheck(args, logger):
 
         print_header = True
 
+        headers_list = ["Domain Name", "IP Address", "Whois Name", "Whois Organization", "Whois Email",
+                        "Whois Updated Date", "HTTP Similarity", "HTTPS Similarity",
+                        "Country", "City", "Virustotal Result", "Subdomains"]
+
         dns_file = open(dns_file_name, 'a')
         string_array = []
 
@@ -201,12 +218,7 @@ def punyDomainCheck(args, logger):
 
                     if print_header:
 
-                        header_string = "Domain Name - IP Address - Whois Name - Whois Organization - Whois Email - " \
-                                        "Whois Creation Date - Whois Updated Date - HTTP Similarity - HTTPS Similarity - Country - City - Virustotal Result - Subdomains"
-
-                        headers_list = ["Domain Name", "IP Address", "Whois Name", "Whois Organization", "Whois Email",
-                                   "Whois Updated Date", "HTTP Similarity", "HTTPS Similarity",
-                                   "Country", "City", "Virustotal Result", "Subdomains"]
+                        header_string = ";".join(headers_list)
 
                         if dns_file_new_created:
                             dns_file.write("{}\n".format(header_string))
@@ -228,22 +240,6 @@ def punyDomainCheck(args, logger):
                         if vt_report_key_subdomains in result.get_vt_result():
                             subdomains = ",".join(result.get_vt_result()[vt_report_key_subdomains])
 
-                    string_array.append(
-                        [result.get_domain_name(),
-                         result.get_ipaddress(),
-                         whois_name,
-                         whois_organization,
-                         whois_email,
-                         whois_updated_date,
-                         http_similarity,
-                         https_similarity,
-                         result.get_geolocation()[
-                             "country_name"],
-                         result.get_geolocation()[
-                             "city"],
-                         virustotal_result,
-                         subdomains])
-
                     string_to_write = "{};{};{};{};{};{};{};{};{};{};{};{};{}".format(
                         result.get_domain_name(),
                         result.get_ipaddress(),
@@ -260,12 +256,30 @@ def punyDomainCheck(args, logger):
                             "city"],
                         virustotal_result,
                         subdomains)
-
+                    color = ""
                     if "{}\n".format(string_to_write) not in dns_file_content:
                         dns_file.write("{}\n".format(string_to_write))
+                        color = RED
+
+                    string_array.append(
+                        [color, result.get_domain_name(),
+                         result.get_ipaddress(),
+                         whois_name,
+                         whois_organization,
+                         whois_email,
+                         whois_updated_date,
+                         http_similarity,
+                         https_similarity,
+                         result.get_geolocation()[
+                             "country_name"],
+                         result.get_geolocation()[
+                             "city"],
+                         virustotal_result,
+                         subdomains, RST])
 
         logger.info(
-            "[+] Punycheck result for {}{}.{}{}:\n {}".format(GRE, args.domain, args.suffix, RST, tabulate(string_array, headers=headers_list)))
+            "[+] Punycheck result for {}{}.{}{}:\n {}".format(GRE, args.domain, args.suffix, RST,
+                                                              tabulate(string_array, headers=headers_list)))
 
         dns_file.close()
 
