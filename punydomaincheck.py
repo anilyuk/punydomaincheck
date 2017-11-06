@@ -26,9 +26,9 @@ def arg_parser():
     parser = ArgumentParser(formatter_class=RawTextHelpFormatter)
     parser.add_argument("-u", "--update", action="store_true", default=False, help="Update character set")
     parser.add_argument("--debug", action="store_true", default=False, help="Enable debug logging")
-    parser.add_argument("-d", "--domain", required=True, help="Domain without prefix and suffix. (google)")
-    parser.add_argument("-s", "--suffix", required=True, help="Suffix to check alternative domain names. (.com, .net)")
-    parser.add_argument("-c", "--count", required=True, help="Character count to change with punycode alternative")
+    parser.add_argument("-d", "--domain", default=None, help="Domain without prefix and suffix. (google)")
+    parser.add_argument("-s", "--suffix", default=None, help="Suffix to check alternative domain names. (.com, .net)")
+    parser.add_argument("-c", "--count", default=1, help="Character count to change with punycode alternative (Default: 1)")
     parser.add_argument("-os", "--original_suffix", default=None,
                         help="Original domain to check for phisihing\n"
                         "Optional, use it with original port to run phishing test")
@@ -54,7 +54,6 @@ def punyDomainCheck(args, logger):
         logger.info("[-] Original port required!")
         exit()
 
-
     try:
 
         charset_json = load_charset()
@@ -69,6 +68,14 @@ def punyDomainCheck(args, logger):
         update_charset(logger, letters_json)
 
     elif int(args.count) <= len(args.domain):
+
+        if not args.domain:
+            logger.info("[-] Domain name required!")
+            exit()
+
+        if not args.suffix:
+            logger.info("[-] Domian Suffix required!")
+            exit()
 
         try:
 

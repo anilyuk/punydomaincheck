@@ -109,7 +109,7 @@ def create_alternatives(args, charset_json, logger, output_dir):
 
                 with_idna = temp_str_unicode.encode('idna')
                 # if "xn" not in with_idna:
-                # print "{} - {}".format(temp_str, with_idna)
+                #print "{} - {}".format(temp_str, with_idna)
 
             except:
 
