@@ -122,7 +122,9 @@ def makeRequest(url, logger, redirect=True, proxies={}):
 def meta_redirect(content):
     soup = BeautifulSoup(content, "html.parser")
     result = soup.find("meta", attrs={"http-equiv": re.compile("^refresh", re.I)})
-    if result:
+
+    if result and ["content"] in result:
+
         wait, text = result["content"].split(";")
         if text.strip().lower().startswith("url="):
             url = text[4:]
@@ -205,6 +207,7 @@ def grabLinks(soup):
     toReturn = toReturn + find_list_resources('img', "src", soup)
     toReturn = toReturn + find_list_resources('script', "src", soup)
     toReturn = toReturn + find_list_resources("link", "href", soup)
+    toReturn = toReturn + find_list_resources("a", "href", soup)
     toReturn = toReturn + find_list_resources("video", "src", soup)
     toReturn = toReturn + find_list_resources("audio", "src", soup)
     toReturn = toReturn + find_list_resources("iframe", "src", soup)
