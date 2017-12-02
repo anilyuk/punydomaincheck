@@ -4,7 +4,7 @@ Punycode is a special encoding used to convert Unicode characters to ASCII, whic
 
 Confusable characters are from "http://www.unicode.org/Public/security/latest/confusables.txt". Update character set regularly to take new confusable characters!
 
-To add new letters read [FILES.md](misc/FILES.md) file.
+To add new letters read [FILES.md](misc/FILES.md).
 
 Punycode alternative domain names are widely used for phishing attacks. This tool helps to identify alternative domain names and look for several information of that domanin. It looks for DNS info, Whois info and open ports (TCP/443, TCP/80), Virustotal API.
 
