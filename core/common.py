@@ -6,7 +6,7 @@
 from sys import stdout, platform
 from core.logger import LOG_HEADER
 
-VERSION = "1.0.2"
+VERSION = "1.0.3"
 CONFUSABLE_URL = "http://www.unicode.org/Public/security/latest/confusables.txt"
 CONFUSABLE_FILE = "./misc/confusables.txt"
 BLACKLIST_LETTERS = "./misc/blacklist_letters.json"
@@ -21,9 +21,9 @@ VT_APIKEY_LIST = []
 
 BANNER = ''' _ __  _   _ _ __  _   _  ___| |__   ___  ___| | __
 | '_ \| | | | '_ \| | | |/ __| '_ \ / _ \/ __| |/ /
-| |_) | |_| | | | | |_| | (__| | | |  __/ (__|   < 
+| |_) | |_| | | | | |_| | (__| | | |  __/ (__|   <
 | .__/ \__,_|_| |_|\__, |\___|_| |_|\___|\___|_|\_\\
-|_|                |___/                                {}    
+|_|                |___/                                {}
 '''.format(VERSION)
 
 
