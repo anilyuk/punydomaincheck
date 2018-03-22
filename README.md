@@ -36,10 +36,3 @@ python punydomaincheck.py -d yourdomain -s com -os com -op 443 -c 2
     -f --force              Force to create alternative domain names
     -t --thread             Thread count (Default: 10)
 
-
-
-Donation:
-
-BTC: 151LxWrV1wz89j9ux5dZDWY6sGxt9oNkfJ
-
-ETH: 0xa8cf5d2ca638ba8f8372169cfa795a5f1f8bdbac
