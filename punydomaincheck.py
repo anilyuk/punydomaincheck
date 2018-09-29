@@ -247,6 +247,14 @@ def punyDomainCheck(args, logger):
                         if vt_report_key_subdomains in result.get_vt_result():
                             subdomains = ",".join(result.get_vt_result()[vt_report_key_subdomains])
 
+                    country_name = ""
+                    if "country_name" in result.get_geolocation():
+                        country_name = result.get_geolocation()["country_name"]
+
+                    city_name = ""
+                    if "city" in result.get_geolocation():
+                        city_name = result.get_geolocation()["city"]
+                    
                     string_to_write = "{};{};{};{};{};{};{};{};{};{};{};{};{}".format(
                         result.get_domain_name(),
                         result.get_ipaddress(),
@@ -257,10 +265,8 @@ def punyDomainCheck(args, logger):
                         whois_updated_date,
                         http_similarity,
                         https_similarity,
-                        result.get_geolocation()[
-                            "country_name"],
-                        result.get_geolocation()[
-                            "city"],
+                        country_name,
+                        city_name,
                         virustotal_result,
                         subdomains)
                     color = ""
@@ -277,10 +283,8 @@ def punyDomainCheck(args, logger):
                          whois_updated_date,
                          http_similarity,
                          https_similarity,
-                         result.get_geolocation()[
-                             "country_name"],
-                         result.get_geolocation()[
-                             "city"],
+                         country_name,
+                         city,
                          virustotal_result,
                          subdomains, RST])
 
