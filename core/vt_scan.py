@@ -106,8 +106,8 @@ def getDomainReportResults(report):
         return None
 
 
-@rate_limited(vt_api_request_limit * (len(VT_APIKEY_LIST) - 1),
-              60)  # virustotal api has request limit: 4 request per minute
+#@rate_limited(vt_api_request_limit * len(VT_APIKEY_LIST),
+ #             60)  # virustotal api has request limit: 4 request per minute
 def makeRequest(url, params, http_method):
     params[vt_request_param_apikey] = changeApiKey()
     packages.urllib3.disable_warnings()

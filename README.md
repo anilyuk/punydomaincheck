@@ -12,6 +12,8 @@ When it finds a domain name with IP address, it checks similarities between orig
 
 #### Requirements: ####
 * Virustotal API Key
+* Download geoip database and put the database to "./misc" folder:
+     https://geolite.maxmind.com/download/geoip/database/GeoLite2-City.tar.gz
 
 
 #### Python requirements: ####

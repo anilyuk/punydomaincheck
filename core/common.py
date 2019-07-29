@@ -6,7 +6,7 @@
 from sys import stdout, platform
 from core.logger import LOG_HEADER
 
-VERSION = "1.0.3"
+VERSION = "1.0.4"
 CONFUSABLE_URL = "http://www.unicode.org/Public/security/latest/confusables.txt"
 CONFUSABLE_FILE = "./misc/confusables.txt"
 BLACKLIST_LETTERS = "./misc/blacklist_letters.json"
@@ -15,9 +15,9 @@ CHARSET_FILE = "./misc/charset.json"
 LETTERS_FILE = "./misc/letters.json"
 MAX_THREAD_COUNT = 7
 OUTPUT_DIR = "./output"
-GEOLOCATION_WEBSITE = "http://freegeoip.net/json"
-### YOUR VIRUSTOTAL API KEYs
-VT_APIKEY_LIST = []
+GEOLOCATION_DATABASE_DIRECTORY = "./misc/GeoLite2-City.mmdb"
+### YOUR VIRUSTOTAL API KEYs, Add more API keys to increase request limit. Free account has 4 request per minute limitis.
+VT_APIKEY_LIST = ["ffa837d2c07a330cd547821cad763f9cc5c42adb59428d055f327c49c9d6df04"]
 
 BANNER = ''' _ __  _   _ _ __  _   _  ___| |__   ___  ___| | __
 | '_ \| | | | '_ \| | | |/ __| '_ \ / _ \/ __| |/ /

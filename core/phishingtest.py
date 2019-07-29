@@ -265,7 +265,7 @@ def CheckPhishing(or_domain, or_site_port, test_domain, logger):
 
     test_ip = getIPAddress(test_domain)
 
-    if test_ip and or_ip:
+    if test_ip and or_ip and or_site:
         test_ports = checkOpenPorts(test_ip)
         test_urls = []
         for port in test_ports:

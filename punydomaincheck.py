@@ -17,10 +17,10 @@ from Queue import Queue
 from os.path import getsize
 from tabulate import tabulate
 from os import remove, mkdir, stat
+from core.phishingdomain import PhishingDomain
 
 if VT_APIKEY_LIST:
-    from core.vt_scan import vt_report_key_positives, vt_report_total, vt_report_key_subdomains
-
+    from core.vt_scan import vt_report_key_positives, vt_report_total, vt_report_key_subdomains, scanURL
 
 def arg_parser():
     parser = ArgumentParser(formatter_class=RawTextHelpFormatter)
@@ -168,6 +168,18 @@ def punyDomainCheck(args, logger):
             if len(query_result) == int(thread_count):
                 dns_client_completed = True
 
+        if VT_APIKEY_LIST:
+
+            logger.info("[*] Checking for VirusTotal")
+
+            for results in query_result:
+
+                for result in results:
+                    result.set_vt_result(scanURL(url=(result.get_domain_name()+"."+str(args.suffix))))
+                    # VirusTotal Free has 4 request per minute requests limit and sleep time is set based on this.
+                    # If you have VirusTotal Premium membership change sleep value based on your limits.
+                    sleep((60/(len(VT_APIKEY_LIST) * 4)) + 2)
+
         dns_file_name = "{}/{}_dns".format(output_dir, args.domain)
         dns_file_content = []
         dns_file_new_created = True
@@ -216,10 +228,17 @@ def punyDomainCheck(args, logger):
                                 if whois_admin:
 
                                     if "email" in whois_admin: whois_email = whois_admin["email"]
+                                    else: whois_email="NA"
 
                                     if "name" in whois_admin: whois_name = whois_admin["name"]
+                                    else: whois_name = "NA"
 
                                     if "organization" in whois_admin: whois_organization = whois_admin["organization"]
+                                    else: whois_organization = "NA"
+                            else:
+                                whois_email = "NA"
+                                whois_name = "NA"
+                                whois_organization = "NA"
 
                         if "updated_date" in whois_result: whois_updated_date = whois_result["updated_date"][0]
 
@@ -247,13 +266,10 @@ def punyDomainCheck(args, logger):
                         if vt_report_key_subdomains in result.get_vt_result():
                             subdomains = ",".join(result.get_vt_result()[vt_report_key_subdomains])
 
-                    country_name = ""
-                    if "country_name" in result.get_geolocation():
-                        country_name = result.get_geolocation()["country_name"]
 
-                    city_name = ""
-                    if "city" in result.get_geolocation():
-                        city_name = result.get_geolocation()["city"]
+                    country_name = result.get_geolocation().country.name
+
+                    city_name = result.get_geolocation().city.name
                     
                     string_to_write = "{};{};{};{};{};{};{};{};{};{};{};{};{}".format(
                         result.get_domain_name(),
@@ -284,7 +300,7 @@ def punyDomainCheck(args, logger):
                          http_similarity,
                          https_similarity,
                          country_name,
-                         city,
+                         city_name,
                          virustotal_result,
                          subdomains, RST])
 

@@ -5,3 +5,4 @@ dnspython
 requests
 ratelimit
 tabulate
+geoip2

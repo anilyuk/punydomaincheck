@@ -3,15 +3,15 @@
 # E-mail: anil [ . ] yksel [ @ ] gmail [ . ] com, mmkaratas92 [ @ ] gmail [ . ] com
 # URL: https://github.com/anilyuk/punydomaincheck
 
-from core.common import alternative_filename, GEOLOCATION_WEBSITE, VT_APIKEY_LIST
+from core.common import alternative_filename, GEOLOCATION_DATABASE_DIRECTORY, VT_APIKEY_LIST
+import geoip2.database
 from threading import Thread
 import dns.resolver
 from phishingdomain import PhishingDomain
 from pythonwhois import get_whois
 from phishingtest import CheckPhishing
 import requests
-if VT_APIKEY_LIST:
-    from core.vt_scan import scanURL
+
 
 class dns_client(Thread):
     def __init__(self, args, logger, domain_list, output_queue, thread_name):
@@ -58,15 +58,15 @@ class dns_client(Thread):
                         geolocation_result = self.query_geolocation(ip_address=answer)
                         result.set_geolocation(geolocation=geolocation_result)
 
-                        if VT_APIKEY_LIST:
-                            result.set_vt_result(scanURL(url=query))
-
                         if self.args.domain and self.args.original_suffix:
 
                             original_domain = "{}.{}".format(self.args.domain, self.args.original_suffix)
                             similarity = CheckPhishing(or_domain=original_domain, or_site_port=self.args.original_port,
                                                        test_domain=str(query), logger=self.logger)
                             result.set_similarity(similarity=similarity)
+
+                            #if VT_APIKEY_LIST and (similarity["http_similarity"] or similarity["https_similarity"]):
+                             #   result.set_vt_result(scanURL(url=query))
 
                         self.output_list.append(result)
 
@@ -87,25 +87,25 @@ class dns_client(Thread):
 
         try:
             self.resolver = dns.resolver.Resolver()
-            self.resolver.timeout = 1
-            self.resolver.lifetime = 1
+            self.resolver.timeout = 5
+            #self.resolver.lifetime = 1
             # ip_address = gethostbyname(query)
             answers = self.resolver.query(query)
 
         # except gaierror, g:
         except dns.resolver.NXDOMAIN, n:
-            self.logger.debug("[-] {}".format(n))
+            self.logger.debug("[-] {} for {}".format(n, str(query)))
             return None
 
         except dns.resolver.Timeout, t:
-            self.logger.debug("[-] {}".format(t))
+            self.logger.debug("[-] {} for {}".format(t, str(query)))
             return None
         except dns.resolver.NoNameservers, n:
-            self.logger.debug("[-] {}".format(n))
+            self.logger.debug("[-] {} for {}".format(n, str(query)))
             return None
 
         except Exception, e:
-            self.logger.debug("[-] {}".format(e))
+            self.logger.debug("[-] {} for {}".format(e, str(query)))
             return None
 
         else:
@@ -143,16 +143,21 @@ class dns_client(Thread):
             self.logger.debug(e)
             return None
 
-        except:
+        except Exception, e:
 
-            self.logger.debug(e)
+            self.logger.debug("[-] {} for {}".format(e, str(query)))
             return None
 
     def query_geolocation(self, ip_address):
 
-        response = requests.get("{}/{}".format(GEOLOCATION_WEBSITE, ip_address))
-        json_response = response.json()
-        return json_response
+        reader = geoip2.database.Reader(GEOLOCATION_DATABASE_DIRECTORY)
+        try:
+            response = reader.city(ip_address=str(ip_address))
+            return response
+        except TypeError, e:
+            self.logger.warn(e)
+            self.logger.warn(ip_address)
+
 
 
 def load_domainnames(args, output_dir):
