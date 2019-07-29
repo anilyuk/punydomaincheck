@@ -11,7 +11,7 @@ from core.exceptions import CharSetException, AlternativesExists
 from core.logger import start_logger
 from core.confusable import update_charset
 from core.domain import load_domainnames, dns_client
-from core.common import print_percentage, OUTPUT_DIR, BANNER, BLU, RST, RED, GRE, VT_APIKEY_LIST
+from core.common import print_percentage, OUTPUT_DIR, BANNER, BLU, RST, RED, GRE, VT_APIKEY_LIST, GEOLOCATION_DATABASE_FILE
 from time import sleep
 from Queue import Queue
 from os.path import getsize
@@ -107,6 +107,10 @@ def punyDomainCheck(args, logger):
             exit()
         except KeyboardInterrupt:
             exit()
+
+        if not isfile(GEOLOCATION_DATABASE_FILE) :
+            logger.warn("[*] Download GeoIP Database to query geolocation!")
+
 
         domain_name_list = load_domainnames(args=args, output_dir=output_dir)
         dns_thread_list = []
@@ -266,10 +270,12 @@ def punyDomainCheck(args, logger):
                         if vt_report_key_subdomains in result.get_vt_result():
                             subdomains = ",".join(result.get_vt_result()[vt_report_key_subdomains])
 
-
-                    country_name = result.get_geolocation().country.name
-
-                    city_name = result.get_geolocation().city.name
+                    if result.get_geolocation() is not None:
+                        country_name = result.get_geolocation().country.name
+                        city_name = result.get_geolocation().city.name
+                    else:
+                        country_name = ""
+                        city_name = ""
                     
                     string_to_write = "{};{};{};{};{};{};{};{};{};{};{};{};{}".format(
                         result.get_domain_name(),

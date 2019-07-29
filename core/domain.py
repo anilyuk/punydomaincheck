@@ -3,7 +3,7 @@
 # E-mail: anil [ . ] yksel [ @ ] gmail [ . ] com, mmkaratas92 [ @ ] gmail [ . ] com
 # URL: https://github.com/anilyuk/punydomaincheck
 
-from core.common import alternative_filename, GEOLOCATION_DATABASE_DIRECTORY, VT_APIKEY_LIST
+from core.common import alternative_filename, GEOLOCATION_DATABASE_FILE, VT_APIKEY_LIST
 import geoip2.database
 from threading import Thread
 import dns.resolver
@@ -11,7 +11,7 @@ from phishingdomain import PhishingDomain
 from pythonwhois import get_whois
 from phishingtest import CheckPhishing
 import requests
-
+from os.path import isfile
 
 class dns_client(Thread):
     def __init__(self, args, logger, domain_list, output_queue, thread_name):
@@ -38,14 +38,6 @@ class dns_client(Thread):
             if len(domain) > 1:
                 query = domain + "." + self.args.suffix
                 dns_result = self.query_dns(query)
-                # whois_result = self.query_whois(query)
-
-                # if not dns_result and whois_result:
-                #    result = PhishingDomain(domain_name=domain, ipaddress=str("No DNS Record"),
-                # whois_result=whois_result)
-                #    self.output_list.append(result)
-
-                # else:
 
                 if dns_result:
 
@@ -55,8 +47,9 @@ class dns_client(Thread):
                         result = PhishingDomain(domain_name=domain, ipaddress=str(answer),
                                                 whois_result=whois_result)
 
-                        geolocation_result = self.query_geolocation(ip_address=answer)
-                        result.set_geolocation(geolocation=geolocation_result)
+                        if isfile(GEOLOCATION_DATABASE_FILE):
+                            geolocation_result = self.query_geolocation(ip_address=answer)
+                            result.set_geolocation(geolocation=geolocation_result)
 
                         if self.args.domain and self.args.original_suffix:
 
@@ -64,9 +57,6 @@ class dns_client(Thread):
                             similarity = CheckPhishing(or_domain=original_domain, or_site_port=self.args.original_port,
                                                        test_domain=str(query), logger=self.logger)
                             result.set_similarity(similarity=similarity)
-
-                            #if VT_APIKEY_LIST and (similarity["http_similarity"] or similarity["https_similarity"]):
-                             #   result.set_vt_result(scanURL(url=query))
 
                         self.output_list.append(result)
 
@@ -150,15 +140,19 @@ class dns_client(Thread):
 
     def query_geolocation(self, ip_address):
 
-        reader = geoip2.database.Reader(GEOLOCATION_DATABASE_DIRECTORY)
         try:
+            reader = geoip2.database.Reader(GEOLOCATION_DATABASE_FILE)
             response = reader.city(ip_address=str(ip_address))
-            return response
+
         except TypeError, e:
             self.logger.warn(e)
             self.logger.warn(ip_address)
-
-
+            return None
+        except IOError, e:
+            self.logger.warn("[-] Download GeoIP Database to query geolocation!")
+            return None
+        else:
+            return response
 
 def load_domainnames(args, output_dir):
 

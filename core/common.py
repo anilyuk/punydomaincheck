@@ -15,9 +15,9 @@ CHARSET_FILE = "./misc/charset.json"
 LETTERS_FILE = "./misc/letters.json"
 MAX_THREAD_COUNT = 7
 OUTPUT_DIR = "./output"
-GEOLOCATION_DATABASE_DIRECTORY = "./misc/GeoLite2-City.mmdb"
+GEOLOCATION_DATABASE_FILE = "./misc/GeoLite2-City.mmdb"
 ### YOUR VIRUSTOTAL API KEYs, Add more API keys to increase request limit. Free account has 4 request per minute limitis.
-VT_APIKEY_LIST = ["ffa837d2c07a330cd547821cad763f9cc5c42adb59428d055f327c49c9d6df04"]
+VT_APIKEY_LIST = []
 
 BANNER = ''' _ __  _   _ _ __  _   _  ___| |__   ___  ___| | __
 | '_ \| | | | '_ \| | | |/ __| '_ \ / _ \/ __| |/ /
